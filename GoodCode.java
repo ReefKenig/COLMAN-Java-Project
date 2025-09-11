@@ -1,29 +1,38 @@
 
 package test;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class GoodCode {
 
-	public static int getNum(List<Point2D> ps){
-		int n=0,x=0,y=0;
-		// find a pair of points with equal x,y
-		for(int i=0;i<ps.size();i++)
-			for(int j=i+1;j<ps.size();j++)
-				if(ps.get(i).equals(ps.get(j))){
-					x=ps.get(i).x;
-					y=ps.get(i).y;
-					break;	// no need to keep looking
-				}
-		
-		// count how many points have the same x,y
-		for(int i=0;i<ps.size();i++){
-			if(ps.get(i).x==x && ps.get(i).y==y)
-				n++;
-		}
-		return n;
-	}
+    public static int getNum(List<Point2D> ps) {
+        int x = 0, y = 0;
+        boolean found = false;
 
+        // Find the duplicate using a set
+        Set<Point2D> seen = new HashSet<>();
+        for (Point2D p : ps) {
+            if (!seen.add(p)) {
+                // Duplicate found
+                x = p.x;
+                y = p.y;
+                found = true;
+                break;
+            }
+        }
 
+        // Count how many times this point appears
+        int n = 0;
+        if (found) {
+            for (Point2D p : ps) {
+                if (p.x == x && p.y == y) {
+                    n++;
+                }
+            }
+        }
 
+        return n;
+    }
 }
