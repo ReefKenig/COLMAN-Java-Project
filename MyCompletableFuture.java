@@ -13,15 +13,18 @@ public class MyCompletableFuture<V> {
     private final List<Runnable> applyCallbacks = new ArrayList<>();
 
     // implement set
+    // Insert the value, triggers everything waiting for it
     public void set(V v) {
-        if (isSet) return; // ignore if already set
+        if (isSet) return; // Don't allow double set
         this.value = v;
         this.isSet = true;
 
-        // Run all stored callbacks
+        // Accept callbacks
         for (Consumer<V> c : acceptCallbacks) {
             c.accept(v);
         }
+
+        // Apply callbacks
         for (Runnable r : applyCallbacks) {
             r.run();
         }
@@ -40,13 +43,14 @@ public class MyCompletableFuture<V> {
             // value already available → run now
             callback.run();
         } else {
-            // store for later
+            // Wait until set is called
             applyCallbacks.add(callback);
         }
         return next;
     }
 
     // implement thenAccept
+    // Attach a consumer. Runs once when value is available
     public void thenAccept(Consumer<V> c) {
         if (isSet) {
             c.accept(value);
@@ -56,6 +60,7 @@ public class MyCompletableFuture<V> {
     }
 
     // implement get
+    // Return the value, null if not set
     public V get() {
         return value;
     }

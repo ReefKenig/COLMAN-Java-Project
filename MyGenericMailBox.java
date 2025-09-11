@@ -6,10 +6,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class MyGenericMailBox extends MailBox {
 
-    private final Consumer<String> logic;
+    private final Consumer<String> logic; // What to do with each message
     private final BlockingQueue<String> queue = new LinkedBlockingQueue<>();
-    private volatile boolean closed = false;
-    private final Thread worker;
+    private volatile boolean closed = false; // Signal for shutdown
+    private final Thread worker; // Background worker
 
     public MyGenericMailBox(int id, Consumer<String> logic) {
         super(id);
@@ -24,12 +24,11 @@ public class MyGenericMailBox extends MailBox {
                     if (closed && queue.isEmpty()) {
                         break;
                     }
-                    // Wait for a message (interruptible)
-                    msg = queue.take();
-                    logic.accept(msg);
+                    msg = queue.take(); // Wait for next message
+                    logic.accept(msg); // Handle message
                 }
             } catch (InterruptedException e) {
-                // Thread can be interrupted when closing
+                // If interrupted, exit the thread
                 Thread.currentThread().interrupt();
             }
         });
@@ -39,7 +38,7 @@ public class MyGenericMailBox extends MailBox {
     @Override
     void addMessage(String msg) {
         if (!closed) {
-            queue.offer(msg);
+            queue.offer(msg); // Enqueue the message
         }
     }
 

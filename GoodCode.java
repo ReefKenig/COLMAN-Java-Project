@@ -5,23 +5,28 @@ import java.util.*;
 
 public class GoodCode {
 
+    // Squared distance (keep it integer until the end for faster computations)
     private static long dist2(Point2D a, Point2D b) {
         long dx = (long) a.x - b.x;
         long dy = (long) a.y - b.y;
         return dx * dx + dy * dy;
     }
 
+    // Cross product (figure out orientation in hull building + calipers)
     private static long cross(Point2D o, Point2D a, Point2D b) {
         return (long) (a.x - o.x) * (b.y - o.y) - (long) (a.y - o.y) * (b.x - o.x);
     }
 
+    // Build convex hull using Andrew's monotone chian algorithm
     private static List<Point2D> convexHull(List<Point2D> points) {
         int n = points.size();
         if (n <= 1) return new ArrayList<>(points);
 
+        // Sort by x, then by y
         List<Point2D> ps = new ArrayList<>(points);
         ps.sort(Comparator.<Point2D>comparingInt(p -> p.x).thenComparingInt(p -> p.y));
 
+        // Remove duplicates
         List<Point2D> uniq = new ArrayList<>();
         Point2D prev = null;
         for (Point2D p : ps) {
@@ -33,6 +38,7 @@ public class GoodCode {
 
         if (uniq.size() <= 1) return new ArrayList<>(uniq);
 
+        // Build lower hull
         List<Point2D> lower = new ArrayList<>();
         for (Point2D p : uniq) {
             while (lower.size() >= 2 &&
@@ -42,6 +48,7 @@ public class GoodCode {
             lower.add(p);
         }
 
+        // Build upper hull
         List<Point2D> upper = new ArrayList<>();
         for (int i = uniq.size() - 1; i >= 0; i--) {
             Point2D p = uniq.get(i);
@@ -52,12 +59,14 @@ public class GoodCode {
             upper.add(p);
         }
 
+        // Merge both parts
         lower.remove(lower.size() - 1);
         upper.remove(upper.size() - 1);
         lower.addAll(upper);
         return lower;
     }
 
+    // Main function: compute max distance between two points
     public static double getMaxDist(List<Point2D> ps) {
         if (ps == null || ps.size() < 2) return 0.0;
 
@@ -66,12 +75,14 @@ public class GoodCode {
         if (m == 0 || m == 1) return 0.0;
         if (m == 2) return Math.sqrt(dist2(hull.get(0), hull.get(1)));
 
+        // Find farthest pair
         int j = 1;
         long best2 = 0;
 
         for (int i = 0; i < m; i++) {
             int ni = (i + 1) % m;
 
+            // Move j while area keeps increasing
             while (true) {
                 int nj = (j + 1) % m;
                 long areaNow = Math.abs(cross(hull.get(i), hull.get(ni), hull.get(j)));
@@ -83,6 +94,7 @@ public class GoodCode {
                 }
             }
 
+            // Check distances for current i,j pair
             long d2 = dist2(hull.get(i), hull.get(j));
             if (d2 > best2) best2 = d2;
             long d2b = dist2(hull.get(ni), hull.get(j));
