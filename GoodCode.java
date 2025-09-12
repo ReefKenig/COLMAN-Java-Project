@@ -5,16 +5,26 @@ import java.util.List;
 public class GoodCode {
 
 	public static int getMaxLength(List<Integer> vs){
-		int max=0;
-		for(int i=0;i<vs.size();i++){ // for each value x
-			int x=vs.get(i);
-			int len=1;
-			int y;
-			// find the length of next values that are equal to x
-			for(int j=i+1; j<vs.size() && (y=vs.get(j))==x; j++,len++);
-			if (len>max) // maintain max length
-				max=len;		
-		}
-		return max;
+		if (vs.isEmpty()) {
+            return 0; // Array is empty
+        }
+
+        int max = 1; // Longest run so far
+        int currentLen = 1; // Length of the current run
+
+        for (int i = 1; i < vs.size(); i++) {
+            // Check if same as previous number
+            if (vs.get(i).equals(vs.get(i - 1))) {
+                currentLen++; // Increment count
+            } else {
+                currentLen = 1; // Reset streak
+            }
+            // Update max if needed
+            if (currentLen > max) {
+                max = currentLen;
+            }
+        }
+
+        return max;
 	}
 }
